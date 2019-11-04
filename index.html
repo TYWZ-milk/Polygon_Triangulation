@@ -1,0 +1,119 @@
+<html>
+<head>
+    <title>Polygon Triangulation</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+<body>
+<div id = "draw-shapes"></div>
+<button type="button" onclick="drawPolygon()">Draw polygon</button>
+<button type="button" onclick="clearCanvas()">CLear</button>
+<script src="js/two.js"></script>
+<script>
+    let two;
+    let points = [];
+    let lines = [];
+    init();
+    function init() {
+
+        // Make an instance of two and place it on the page.
+        let elem = document.getElementById('draw-shapes');
+        let params = {width: window.innerWidth, height: window.innerHeight};
+        two = new Two(params).appendTo(elem);
+
+
+        // Don't forget to tell two to render everything
+        // to the screen
+        two.update();
+
+        let click=document.getElementById("draw-shapes");
+        click.addEventListener("mousedown",function(event){
+            clickAdd(event.x,event.y);
+        },false);
+    }
+    //add points to canvas by clicking
+    function clickAdd(x,y) {
+        let circle = two.makeCircle(x, y, 5);
+        //random color
+        circle.fill = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
+        circle.linewidth = 0;
+        points.push(circle);
+        //add line
+        let line;
+        if(points.length>1) {
+            line = two.makeLine(circle.translation.x, circle.translation.y, points[points.length-2].translation.x, points[points.length-2].translation.y);
+            line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
+            line.linewidth = 1;
+            let newLine = {
+                "line":line,
+                "x1":circle.translation.x,
+                "y1":circle.translation.y,
+                "x2":points[points.length-2].translation.x,
+                "y2":points[points.length-2].translation.y
+            };
+            if(checkIntersection(newLine)){
+
+                alert("Wrong Polygon! Please clear the canvas.");
+            }
+            lines.push(newLine);
+        }
+
+
+        two.update();
+    }
+
+    //check intersection of line with all line segments in lines
+    function checkIntersection(line) {
+        for(let i =0;i<lines.length;i++){
+                let a = line.x1, b = line.y1, c = line.x2, d = line.y2, p = lines[i].x1, q= lines[i].y1, r = lines[i].x2, s = lines[i].y2;
+                let det, gamma, lambda;
+                det = (c - a) * (s - q) - (r - p) * (d - b);
+                if (det !== 0) {
+                    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+                    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+                    if((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1) === true)
+                    return true;
+                }
+
+        }
+        return false;
+    }
+
+    //draw polygon
+    function drawPolygon() {
+        let line;
+        if(points.length>2) {
+            line = two.makeLine(points[0].translation.x, points[0].translation.y, points[points.length-1].translation.x, points[points.length-1].translation.y);
+            line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
+            line.linewidth = 1;
+            let newLine = {
+                "line":line,
+                "x1":points[0].translation.x,
+                "y1":points[0].translation.y,
+                "x2":points[points.length-1].translation.x,
+                "y2":points[points.length-1].translation.y
+            };
+            if(checkIntersection(newLine)){
+
+                alert("Wrong Polygon! Please clear the canvas.");
+            }
+            lines.push(newLine);
+            two.update();
+        }
+        else{
+            alert("Not enough points");
+        }
+    }
+
+    //clear canvas
+    function clearCanvas() {
+        lines = [];
+        points = [];
+        two.clear();
+        two.update();
+    }
+</script>
+</body>
+</html>
