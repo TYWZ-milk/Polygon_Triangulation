@@ -4,15 +4,36 @@
     <style>
         body { margin: 0; }
         canvas { width: 100%; height: 100% }
+        .solid {    border-width: 1px;
+            border-color: black;
+            border-style: solid;
+            width: 600px;
+            height:375px;
+            display: inline-block}
+        .pd {    border-width: 1px;
+            border-color: black;
+            border-style: solid;
+            width: 600px;
+            height:750px;
+            display: inline-block;
+        float:left}
     </style>
 </head>
 <body>
-<div id = "draw-shapes"></div>
+<div class="pd" id = "draw-shapes"></div>
+<div style="display: inline-block;width: 600px;height:750px">
+<div class="solid" id = "draw-tree"></div>
+<div class="solid" id = "draw-ytree"></div>
+</div>
 <button type="button" onclick="drawPolygon()">Draw polygon</button>
 <button type="button" onclick="clearCanvas()">CLear</button>
+<button type="button" onclick="finishDraw()">Build Tree</button>
 <script src="js/two.js"></script>
+<script src="js/buildTree.js"></script>
 <script>
     let two;
+    let treePlane;
+    let ytreePlane;
     let points = [];
     let lines = [];
     init();
@@ -20,14 +41,17 @@
 
         // Make an instance of two and place it on the page.
         let elem = document.getElementById('draw-shapes');
-        let params = {width: window.innerWidth, height: window.innerHeight};
-        two = new Two(params).appendTo(elem);
-
-
+        let elem2 = document.getElementById('draw-tree');
+        let elem3 = document.getElementById('draw-ytree');
+        let param1 = {width: 600, height: 750};
+        let params = {width: 600, height: 375};
+        two = new Two(param1).appendTo(elem);
+        treePlane = new Two(params).appendTo(elem2);
+        ytreePlane = new Two(params).appendTo(elem3);
         // Don't forget to tell two to render everything
         // to the screen
         two.update();
-
+        treePlane.update();
         let click=document.getElementById("draw-shapes");
         click.addEventListener("mousedown",function(event){
             clickAdd(event.x,event.y);
@@ -37,28 +61,28 @@
     function clickAdd(x,y) {
         let circle = two.makeCircle(x, y, 5);
         //random color
-        circle.fill = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
+        circle.fill = '#000000';
         circle.linewidth = 0;
         points.push(circle);
-        //add line
-        let line;
-        if(points.length>1) {
-            line = two.makeLine(circle.translation.x, circle.translation.y, points[points.length-2].translation.x, points[points.length-2].translation.y);
-            line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
-            line.linewidth = 1;
-            let newLine = {
-                "line":line,
-                "x1":circle.translation.x,
-                "y1":circle.translation.y,
-                "x2":points[points.length-2].translation.x,
-                "y2":points[points.length-2].translation.y
-            };
-            if(checkIntersection(newLine)){
-
-                alert("Wrong Polygon! Please clear the canvas.");
-            }
-            lines.push(newLine);
-        }
+        // //add line
+        // let line;
+        // if(points.length>1) {
+        //     line = two.makeLine(circle.translation.x, circle.translation.y, points[points.length-2].translation.x, points[points.length-2].translation.y);
+        //     line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
+        //     line.linewidth = 1;
+        //     let newLine = {
+        //         "line":line,
+        //         "x1":circle.translation.x,
+        //         "y1":circle.translation.y,
+        //         "x2":points[points.length-2].translation.x,
+        //         "y2":points[points.length-2].translation.y
+        //     };
+        //     if(checkIntersection(newLine)){
+        //
+        //         alert("Wrong Polygon! Please clear the canvas.");
+        //     }
+        //     lines.push(newLine);
+        // }
 
 
         two.update();
@@ -113,6 +137,10 @@
         points = [];
         two.clear();
         two.update();
+        treePlane.clear();
+        treePlane.update();
+        ytreePlane.clear();
+        ytreePlane.update();
     }
 </script>
 </body>
