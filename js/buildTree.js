@@ -1,17 +1,13 @@
 function finishDraw() {
+    treePlane.clear();
+    treePlane.update();
+    ytreePlane.clear();
+    ytreePlane.update();
     let sortedX = points.concat();
-    let nodes = points.concat();
     sortedX.sort(function (a,b) {
         return a.translation.x-b.translation.x;
     });
-    // let sortedY = sortedX.concat();
-    // sortedY.sort(function (a,b) {
-    //     return a.translation.y-b.translation.y;
-    // });
-    // for(let i = 0;i<sortedY.length;i++){
-    //     console.log(sortedY[i].translation.y);
-    // }
-    let tree = Build2DRangeTree(sortedX);
+    tree = Build2DRangeTree(sortedX);
     //TraverseTree(tree,0);
     DrawTree(tree);
 }
@@ -24,14 +20,14 @@ function DrawTree(tree) {
 function drawNode(tree,root,addX,addY,level) {
     if(tree == null)return;
 
-    let circle = treePlane.makeCircle(addX, addY, 10);
+    let circle = treePlane.makeCircle(addX, addY, 5);
     circle.fill= '#000000';
     circle.linewidth = 0;
     treePlane.update();
 
     circle._renderer.elem.addEventListener('mouseover', function() {
         for(let i =0;i<tree.range.length;i++){
-            tree.range[i].fill = 'rgb(255, 100, 100)';
+            tree.range[i].radius = 10;
         }
         let line = two.makeLine(tree.value, 900, tree.value,0 );
         line.stroke = '#000000';
@@ -50,15 +46,15 @@ function drawNode(tree,root,addX,addY,level) {
 
     circle._renderer.elem.addEventListener('mouseout', function() {
         for(let i =0;i<tree.range.length;i++){
-            tree.range[i].fill = '#000000';
+            tree.range[i].radius = 5;
         }
         midLine.linewidth = 0;
         treePlane.update();
         two.update();
     }, false);
 
-    drawNode(tree.leftChild,circle,addX-100/level,addY+50,level+1);
-    drawNode(tree.rightChild,circle,addX+100/level,addY+50,level+1);
+    drawNode(tree.leftChild,circle,addX-points.length*15/level,addY+50,level+1);
+    drawNode(tree.rightChild,circle,addX+points.length*15/level,addY+50,level+1);
 
     if(root!=null) {
         let line = treePlane.makeLine(circle.translation.x, circle.translation.y, root.translation.x, root.translation.y,);
@@ -109,13 +105,13 @@ function BuildYtree(sortedY) {
 
 function drawYtree(tree,root,addX,addY,level) {
     if(tree == null)return;
-    let circle = ytreePlane.makeCircle(addX, addY, 10);
+    let circle = ytreePlane.makeCircle(addX, addY, 5);
     circle.fill= '#000000';
     circle.linewidth = 0;
     ytreePlane.update();
     circle._renderer.elem.addEventListener('mouseover', function() {
         for(let i =0;i<tree.range.length;i++){
-            tree.range[i].fill = 'rgb(255, 100, 100)';
+            tree.range[i].radius = 10;
         }
         let line = two.makeLine(0, tree.value, 800,tree.value );
         line.stroke = '#000000';
@@ -128,14 +124,14 @@ function drawYtree(tree,root,addX,addY,level) {
 
     circle._renderer.elem.addEventListener('mouseout', function() {
         for(let i =0;i<tree.range.length;i++){
-            tree.range[i].fill = '#000000';
+            tree.range[i].radius = 5;
         }
         midLine.linewidth = 0;
         ytreePlane.update();
         two.update();
     }, false);
-    drawYtree(tree.leftChild,circle,addX-100/level,addY+50,level+1);
-    drawYtree(tree.rightChild,circle,addX+100/level,addY+50,level+1);
+    drawYtree(tree.leftChild,circle,addX-points.length*15/level,addY+50,level+1);
+    drawYtree(tree.rightChild,circle,addX+points.length*15/level,addY+50,level+1);
 
     if(root!=null) {
         let line = ytreePlane.makeLine(circle.translation.x, circle.translation.y, root.translation.x, root.translation.y,);

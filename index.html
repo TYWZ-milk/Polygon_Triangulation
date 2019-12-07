@@ -22,16 +22,19 @@
 <body>
 <div class="pd" id = "draw-shapes"></div>
 <div style="display: inline-block;width: 600px;height:750px">
-<div class="solid" id = "draw-tree"></div>
-<div class="solid" id = "draw-ytree"></div>
+<svg class="solid" id = "draw-tree" easypz></svg>
+<svg class="solid" id = "draw-ytree" easypz></svg>
 </div>
 <!--<button type="button" onclick="drawPolygon()">Draw polygon</button>-->
+<input type="text" id="num">
+<button type="button" onclick="randomPoints()">Random Points</button>
 <button type="button" onclick="clearCanvas()">CLear</button>
 <button type="button" onclick="finishDraw()">Build Tree</button>
-<button type="button" onclick="query()">Start Query</button>
+<button type="button" onclick="query()">Draw a new Query Rectangle</button>
 <script src="js/two.js"></script>
 <script src="js/query.js"></script>
 <script src="js/buildTree.js"></script>
+<script src="https://code.easypz.io/easypz.latest.min.js"></script>
 <script>
     let two;
     let treePlane;
@@ -40,10 +43,11 @@
     let lines = [];
     let queryR = false;
     let rectangle = [];
+    let tree;
     init();
+
     function init() {
 
-        // Make an instance of two and place it on the page.
         let elem = document.getElementById('draw-shapes');
         let elem2 = document.getElementById('draw-tree');
         let elem3 = document.getElementById('draw-ytree');
@@ -52,8 +56,7 @@
         two = new Two(param1).appendTo(elem);
         treePlane = new Two(params).appendTo(elem2);
         ytreePlane = new Two(params).appendTo(elem3);
-        // Don't forget to tell two to render everything
-        // to the screen
+
         two.update();
         treePlane.update();
         let click=document.getElementById("draw-shapes");
@@ -61,6 +64,24 @@
             clickAdd(event.x,event.y);
         },false);
     }
+
+    function randomPoints() {
+        clearCanvas();
+        if(rectangle.length<2) {
+            if (queryR === false) {
+                let num = document.getElementById('num').value;
+                for(let i =0;i<num;i++){
+                    let circle = two.makeCircle(parseInt(Math.random()*(590-10+1)+10,10), parseInt(Math.random()*(740-10+1)+10,10), 5);
+                    circle.linewidth = 0;
+                    circle.fill = '#000000';
+                    points.push(circle);
+                }
+            }
+            two.update();
+        }
+    }
+
+
     //add points to canvas by clicking
     function clickAdd(x,y) {
         if(rectangle.length<2) {
@@ -75,26 +96,6 @@
                 if(rectangle.length===2)
                     drawRec();
             }
-            // //add line
-            // let line;
-            // if(points.length>1) {
-            //     line = two.makeLine(circle.translation.x, circle.translation.y, points[points.length-2].translation.x, points[points.length-2].translation.y);
-            //     line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
-            //     line.linewidth = 1;
-            //     let newLine = {
-            //         "line":line,
-            //         "x1":circle.translation.x,
-            //         "y1":circle.translation.y,
-            //         "x2":points[points.length-2].translation.x,
-            //         "y2":points[points.length-2].translation.y
-            //     };
-            //     if(checkIntersection(newLine)){
-            //
-            //         alert("Wrong Polygon! Please clear the canvas.");
-            //     }
-            //     lines.push(newLine);
-            // }
-
             two.update();
         }
     }
@@ -144,6 +145,7 @@
 
     //clear canvas
     function clearCanvas() {
+        tree = null;
         lines = [];
         points = [];
         queryR  = false;
