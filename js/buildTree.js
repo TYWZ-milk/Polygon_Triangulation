@@ -17,11 +17,11 @@ function finishDraw() {
 }
 let midLine;
 function DrawTree(tree) {
-    drawNode(tree,null,300,100);
+    drawNode(tree,null,300,50,1);
     treePlane.update();
 }
 
-function drawNode(tree,root,addX,addY) {
+function drawNode(tree,root,addX,addY,level) {
     if(tree == null)return;
 
     let circle = treePlane.makeCircle(addX, addY, 10);
@@ -44,7 +44,7 @@ function drawNode(tree,root,addX,addY) {
 
     circle._renderer.elem.addEventListener('click', function() {
         ytreePlane.clear();
-        drawYtree(tree.yTree,null,300,100);
+        drawYtree(tree.yTree,null,300,50,1);
         ytreePlane.update();
     }, false);
 
@@ -57,8 +57,8 @@ function drawNode(tree,root,addX,addY) {
         two.update();
     }, false);
 
-    drawNode(tree.leftChild,circle,addX-50,addY+50);
-    drawNode(tree.rightChild,circle,addX+50,addY+50);
+    drawNode(tree.leftChild,circle,addX-100/level,addY+50,level+1);
+    drawNode(tree.rightChild,circle,addX+100/level,addY+50,level+1);
 
     if(root!=null) {
         let line = treePlane.makeLine(circle.translation.x, circle.translation.y, root.translation.x, root.translation.y,);
@@ -107,7 +107,7 @@ function BuildYtree(sortedY) {
     }
 }
 
-function drawYtree(tree,root,addX,addY) {
+function drawYtree(tree,root,addX,addY,level) {
     if(tree == null)return;
     let circle = ytreePlane.makeCircle(addX, addY, 10);
     circle.fill= '#000000';
@@ -134,9 +134,8 @@ function drawYtree(tree,root,addX,addY) {
         ytreePlane.update();
         two.update();
     }, false);
-
-    drawYtree(tree.leftChild,circle,addX-50,addY+50);
-    drawYtree(tree.rightChild,circle,addX+50,addY+50);
+    drawYtree(tree.leftChild,circle,addX-100/level,addY+50,level+1);
+    drawYtree(tree.rightChild,circle,addX+100/level,addY+50,level+1);
 
     if(root!=null) {
         let line = ytreePlane.makeLine(circle.translation.x, circle.translation.y, root.translation.x, root.translation.y,);

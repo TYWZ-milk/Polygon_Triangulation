@@ -25,10 +25,12 @@
 <div class="solid" id = "draw-tree"></div>
 <div class="solid" id = "draw-ytree"></div>
 </div>
-<button type="button" onclick="drawPolygon()">Draw polygon</button>
+<!--<button type="button" onclick="drawPolygon()">Draw polygon</button>-->
 <button type="button" onclick="clearCanvas()">CLear</button>
 <button type="button" onclick="finishDraw()">Build Tree</button>
+<button type="button" onclick="query()">Start Query</button>
 <script src="js/two.js"></script>
+<script src="js/query.js"></script>
 <script src="js/buildTree.js"></script>
 <script>
     let two;
@@ -36,6 +38,8 @@
     let ytreePlane;
     let points = [];
     let lines = [];
+    let queryR = false;
+    let rectangle = [];
     init();
     function init() {
 
@@ -59,33 +63,40 @@
     }
     //add points to canvas by clicking
     function clickAdd(x,y) {
-        let circle = two.makeCircle(x, y, 5);
-        //random color
-        circle.fill = '#000000';
-        circle.linewidth = 0;
-        points.push(circle);
-        // //add line
-        // let line;
-        // if(points.length>1) {
-        //     line = two.makeLine(circle.translation.x, circle.translation.y, points[points.length-2].translation.x, points[points.length-2].translation.y);
-        //     line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
-        //     line.linewidth = 1;
-        //     let newLine = {
-        //         "line":line,
-        //         "x1":circle.translation.x,
-        //         "y1":circle.translation.y,
-        //         "x2":points[points.length-2].translation.x,
-        //         "y2":points[points.length-2].translation.y
-        //     };
-        //     if(checkIntersection(newLine)){
-        //
-        //         alert("Wrong Polygon! Please clear the canvas.");
-        //     }
-        //     lines.push(newLine);
-        // }
+        if(rectangle.length<2) {
+            let circle = two.makeCircle(x, y, 5);
+            circle.linewidth = 0;
+            if (queryR === false) {
+                circle.fill = '#000000';
+                points.push(circle);
+            } else {
+                circle.fill = 'rgb(100, 100, 255)';
+                rectangle.push(circle);
+                if(rectangle.length===2)
+                    drawRec();
+            }
+            // //add line
+            // let line;
+            // if(points.length>1) {
+            //     line = two.makeLine(circle.translation.x, circle.translation.y, points[points.length-2].translation.x, points[points.length-2].translation.y);
+            //     line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
+            //     line.linewidth = 1;
+            //     let newLine = {
+            //         "line":line,
+            //         "x1":circle.translation.x,
+            //         "y1":circle.translation.y,
+            //         "x2":points[points.length-2].translation.x,
+            //         "y2":points[points.length-2].translation.y
+            //     };
+            //     if(checkIntersection(newLine)){
+            //
+            //         alert("Wrong Polygon! Please clear the canvas.");
+            //     }
+            //     lines.push(newLine);
+            // }
 
-
-        two.update();
+            two.update();
+        }
     }
 
     //check intersection of line with all line segments in lines
@@ -135,6 +146,8 @@
     function clearCanvas() {
         lines = [];
         points = [];
+        queryR  = false;
+        rectangle = [];
         two.clear();
         two.update();
         treePlane.clear();
