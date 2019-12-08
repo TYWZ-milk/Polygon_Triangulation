@@ -8,30 +8,62 @@
             border-color: black;
             border-style: solid;
             width: 600px;
-            height:375px;
+            height:350px;
             display: inline-block}
         .pd {    border-width: 1px;
             border-color: black;
             border-style: solid;
-            width: 600px;
-            height:750px;
+            width: 500px;
+            height:700px;
             display: inline-block;
-        float:left}
+            float:left;
+        }
+        .buttongroup{
+            display: inline-block;
+            float:right;
+            margin-right: 60px;
+        }
+        .btn_left{
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+        .img_size{
+            width: 20px;
+            height: 20px;
+            margin-top: 10px;
+        }
+        .title{
+            margin-left: 20px;
+            color: brown;
+            margin-bottom: -3px;
+        }
     </style>
 </head>
 <body>
+<div>
 <div class="pd" id = "draw-shapes"></div>
-<div style="display: inline-block;width: 600px;height:750px">
+<div style="display: inline-block;width: 600px;height:700px">
 <svg class="solid" id = "draw-tree" easypz></svg>
 <svg class="solid" id = "draw-ytree" easypz></svg>
 </div>
 <!--<button type="button" onclick="drawPolygon()">Draw polygon</button>-->
-<input type="text" id="num">
-<button type="button" onclick="randomPoints()">Random Points</button>
-<button type="button" onclick="clearCanvas()">Reset</button>
-<button type="button" onclick="finishDraw()" id="startBuild">Build Tree</button>
-<button type="button" onclick="nextStepBT()">next step for building a tree</button>
-<button type="button" onclick="query()">Draw a new Query Rectangle</button>
+<div class="buttongroup">
+    <h1 class="title">2D range tree</h1>
+    <h3>1. Draw Points</h3>
+Random Points:<input type="text" id="num"><br>
+<button class="btn_left" type="button" onclick="randomPoints()">Add</button><br>
+<button class="btn_left" type="button" onclick="clearCanvas()">Reset</button><br>
+    <h3>2. Build 2D range tree</h3>
+<button class="btn_left" type="button" onclick="finishDraw()" id="startBuild">Build Tree</button><br>
+<button class="btn_left" type="button" onclick="nextStepBT()">Next step for building a tree</button><br>
+    <h3>3. Query</h3>
+<button class="btn_left" type="button" onclick="query()">Draw a new Query Rectangle</button><br>
+    <img class="img_size" src="img/blackpoint.png"> Unvisited nodes<br>
+    <img class="img_size" src="img/greenpoint.png"> Visited nodes<br>
+    <img class="img_size" src="img/blupoint.png"> Query associated tree<br>
+   <img class="img_size" src="img/redpoint.png"> Nodes lie in range<br>
+</div>
+</div>
 <script src="js/two.js"></script>
 <script src="js/query.js"></script>
 <script src="js/buildTree.js"></script>
@@ -46,6 +78,7 @@
     let rectangle = [];
     let tree;
     let treeNodes = [];
+    let ytreeNodes = [];
     init();
 
     function init() {
@@ -53,14 +86,15 @@
         let elem = document.getElementById('draw-shapes');
         let elem2 = document.getElementById('draw-tree');
         let elem3 = document.getElementById('draw-ytree');
-        let param1 = {width: 600, height: 750};
-        let params = {width: 600, height: 375};
+        let param1 = {width: 500, height: 700};
+        let params = {width: 600, height: 350};
         two = new Two(param1).appendTo(elem);
         treePlane = new Two(params).appendTo(elem2);
         ytreePlane = new Two(params).appendTo(elem3);
-
+        titleForDia();
         two.update();
         treePlane.update();
+        ytreePlane.update();
         let click=document.getElementById("draw-shapes");
         click.addEventListener("mousedown",function(event){
             clickAdd(event.x,event.y);
@@ -73,7 +107,7 @@
             if (queryR === false) {
                 let num = document.getElementById('num').value;
                 for(let i =0;i<num;i++){
-                    let circle = two.makeCircle(parseInt(Math.random()*(590-10+1)+10,10), parseInt(Math.random()*(740-10+1)+10,10), 5);
+                    let circle = two.makeCircle(parseInt(Math.random()*(490-10+1)+10,10), parseInt(Math.random()*(690-40+1)+40,10), 5);
                     circle.linewidth = 0;
                     circle.fill = '#000000';
                     points.push(circle);
@@ -145,6 +179,15 @@
         }
     }
 
+    function titleForDia() {
+        let text = two.makeText("Primal Plane", 100, 30);
+        text.size = 30;
+        text = treePlane.makeText("Range Tree", 100, 30);
+        text.size = 30;
+        text = ytreePlane.makeText("Associated Tree for each point", 240, 30);
+        text.size = 30;
+    }
+
     //clear canvas
     function clearCanvas() {
         document.getElementById("startBuild").disabled = false;
@@ -153,13 +196,18 @@
         tree = null;
         lines = [];
         points = [];
+        ytreeNodes = [];
         queryR  = false;
         rectangle = [];
+
         two.clear();
-        two.update();
         treePlane.clear();
-        treePlane.update();
         ytreePlane.clear();
+
+
+        titleForDia();
+        two.update();
+        treePlane.update();
         ytreePlane.update();
     }
 </script>

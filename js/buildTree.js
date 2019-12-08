@@ -8,8 +8,9 @@ function nextStepBT() {
 }
 function finishDraw() {
     treePlane.clear();
-    treePlane.update();
     ytreePlane.clear();
+    titleForDia();
+    treePlane.update();
     ytreePlane.update();
     let sortedX = points.concat();
     sortedX.sort(function (a,b) {
@@ -50,6 +51,7 @@ function drawNode(tree,root,addX,addY) {
     circle._renderer.elem.addEventListener('click', function() {
         ytreePlane.clear();
         drawYtree(tree.yTree,null,300,50,1);
+        titleForDia();
         ytreePlane.update();
     }, false);
 
@@ -61,7 +63,7 @@ function drawNode(tree,root,addX,addY) {
         treePlane.update();
         two.update();
     }, false);
-
+    tree.circle = circle;
     // drawNode(tree.leftChild,circle,addX-points.length*15/level,addY+50,level+1);
     // drawNode(tree.rightChild,circle,addX+points.length*15/level,addY+50,level+1);
 
@@ -122,7 +124,10 @@ function BuildYtree(sortedY) {
 function drawYtree(tree,root,addX,addY,level) {
     if(tree == null)return;
     let circle = ytreePlane.makeCircle(addX, addY, 5);
-    circle.fill= '#000000';
+    if(tree.fill===undefined)
+        circle.fill= '#000000';
+    else
+        circle.fill = tree.fill;
     circle.linewidth = 0;
     ytreePlane.update();
     circle._renderer.elem.addEventListener('mouseover', function() {
