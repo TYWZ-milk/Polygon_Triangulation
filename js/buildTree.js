@@ -1,3 +1,11 @@
+let indexOftreeNodes = 0;
+function nextStepBT() {
+    if(indexOftreeNodes<treeNodes.length) {
+        drawNode(treeNodes[indexOftreeNodes].child, treeNodes[indexOftreeNodes].parent, treeNodes[indexOftreeNodes].addX, treeNodes[indexOftreeNodes].addY);
+        indexOftreeNodes++;
+        document.getElementById("startBuild").disabled = true;
+    }
+}
 function finishDraw() {
     treePlane.clear();
     treePlane.update();
@@ -8,16 +16,17 @@ function finishDraw() {
         return a.translation.x-b.translation.x;
     });
     tree = Build2DRangeTree(sortedX);
-    //TraverseTree(tree,0);
-    DrawTree(tree);
+    TraverseTree(tree,1,null,300,50);
+    nextStepBT();
+    // DrawTree(tree);
 }
 let midLine;
 function DrawTree(tree) {
-    drawNode(tree,null,300,50,1);
+    drawNode(tree,null,300,50);
     treePlane.update();
 }
 
-function drawNode(tree,root,addX,addY,level) {
+function drawNode(tree,root,addX,addY) {
     if(tree == null)return;
 
     let circle = treePlane.makeCircle(addX, addY, 5);
@@ -53,21 +62,28 @@ function drawNode(tree,root,addX,addY,level) {
         two.update();
     }, false);
 
-    drawNode(tree.leftChild,circle,addX-points.length*15/level,addY+50,level+1);
-    drawNode(tree.rightChild,circle,addX+points.length*15/level,addY+50,level+1);
+    // drawNode(tree.leftChild,circle,addX-points.length*15/level,addY+50,level+1);
+    // drawNode(tree.rightChild,circle,addX+points.length*15/level,addY+50,level+1);
 
     if(root!=null) {
-        let line = treePlane.makeLine(circle.translation.x, circle.translation.y, root.translation.x, root.translation.y,);
+        let endpoint;
+        for(let i =0;i<treeNodes.length;i++){
+            if(treeNodes[i]===root)
+                endpoint = treeNodes[i];
+        }
+        let line = treePlane.makeLine(circle.translation.x, circle.translation.y, endpoint.addX, endpoint.addY);
         line.stroke = '#000000';
         line.linewidth = 1;
+        treePlane.update();
     }
 }
 
-function TraverseTree(tree,level) {
+function TraverseTree(tree,level,root,addX,addY) {
     if(tree==null)return;
-    TraverseTree(tree.leftChild,level+1);
-    console.log(tree.value+" "+level);
-    TraverseTree(tree.rightChild,level+1);
+    let element = {child:tree,parent:root,level:level,addX:addX,addY:addY};
+    treeNodes.push(element);
+    TraverseTree(tree.leftChild,level+1,element,addX-points.length*15/level,addY+50);
+    TraverseTree(tree.rightChild,level+1,element,addX+points.length*15/level,addY+50);
 
 }
 

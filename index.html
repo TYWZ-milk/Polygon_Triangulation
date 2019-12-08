@@ -28,8 +28,9 @@
 <!--<button type="button" onclick="drawPolygon()">Draw polygon</button>-->
 <input type="text" id="num">
 <button type="button" onclick="randomPoints()">Random Points</button>
-<button type="button" onclick="clearCanvas()">CLear</button>
-<button type="button" onclick="finishDraw()">Build Tree</button>
+<button type="button" onclick="clearCanvas()">Reset</button>
+<button type="button" onclick="finishDraw()" id="startBuild">Build Tree</button>
+<button type="button" onclick="nextStepBT()">next step for building a tree</button>
 <button type="button" onclick="query()">Draw a new Query Rectangle</button>
 <script src="js/two.js"></script>
 <script src="js/query.js"></script>
@@ -44,6 +45,7 @@
     let queryR = false;
     let rectangle = [];
     let tree;
+    let treeNodes = [];
     init();
 
     function init() {
@@ -145,6 +147,9 @@
 
     //clear canvas
     function clearCanvas() {
+        document.getElementById("startBuild").disabled = false;
+        treeNodes = [];
+        indexOftreeNodes = 0;
         tree = null;
         lines = [];
         points = [];
