@@ -22,6 +22,7 @@ function finishDraw() {
     // DrawTree(tree);
 }
 let midLine;
+let midRange;
 function DrawTree(tree) {
     drawNode(tree,null,300,50);
     treePlane.update();
@@ -39,10 +40,20 @@ function drawNode(tree,root,addX,addY) {
         for(let i =0;i<tree.range.length;i++){
             tree.range[i].radius = 10;
         }
-        let line = two.makeLine(tree.value, 900, tree.value,0 );
+        let line = two.makeLine(tree.value, 700, tree.value,0 );
         line.stroke = '#000000';
         line.linewidth = 1;
         midLine = line;
+
+        let lowLine = two.makeLine(tree.range[0].translation.x-1, 700, tree.range[0].translation.x-1,0 );
+        lowLine.stroke = 'rgb(255,135,1)';
+        lowLine.linewidth = 1;
+
+        let highLine = two.makeLine(tree.range[tree.range.length-1].translation.x+1, 700, tree.range[tree.range.length-1].translation.x+1,0 );
+        highLine.stroke = 'rgb(255,135,1)';
+        highLine.linewidth = 1;
+
+        midRange = {low:lowLine,high:highLine};
 
         treePlane.update();
         two.update();
@@ -60,6 +71,8 @@ function drawNode(tree,root,addX,addY) {
             tree.range[i].radius = 5;
         }
         midLine.linewidth = 0;
+        midRange.low.linewidth = 0;
+        midRange.high.linewidth = 0;
         treePlane.update();
         two.update();
     }, false);
@@ -139,6 +152,17 @@ function drawYtree(tree,root,addX,addY,level) {
         line.linewidth = 1;
         midLine = line;
 
+        let lowLine = two.makeLine( 0, tree.range[0].translation.y-1,800,tree.range[0].translation.y-1 );
+        lowLine.stroke = 'rgb(255,135,1)';
+        lowLine.linewidth = 1;
+
+        let highLine =two.makeLine( 0, tree.range[tree.range.length-1].translation.y+1,800,tree.range[tree.range.length-1].translation.y+1 );
+        highLine.stroke = 'rgb(255,135,1)';
+        highLine.linewidth = 1;
+
+        midRange = {low:lowLine,high:highLine};
+
+
         ytreePlane.update();
         two.update();
     }, false);
@@ -148,6 +172,8 @@ function drawYtree(tree,root,addX,addY,level) {
             tree.range[i].radius = 5;
         }
         midLine.linewidth = 0;
+        midRange.low.linewidth = 0;
+        midRange.high.linewidth = 0;
         ytreePlane.update();
         two.update();
     }, false);
