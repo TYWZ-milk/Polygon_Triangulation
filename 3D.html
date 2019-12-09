@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>2D Range Tree</title>
+    <title>3D Range Tree</title>
     <style>
         body { margin: 0; }
         canvas { width: 100%; height: 100% }
@@ -41,41 +41,43 @@
 </head>
 <body>
 <div>
-<div class="pd" id = "draw-shapes"></div>
-<div style="display: inline-block;width: 600px;height:700px">
-<svg class="solid" id = "draw-tree" easypz></svg>
-<svg class="solid" id = "draw-ytree" easypz></svg>
-</div>
-<!--<button type="button" onclick="drawPolygon()">Draw polygon</button>-->
-<div class="buttongroup">
-    <h1 class="title">2D Range Tree</h1>
-    <h3>Step 1. Draw Points</h3>
-    <button class="btn_left" type="button" onclick="clearCanvas()">Reset</button><br>
-    Click the primal plane or<br>
-Random Points:<input type="text" id="num"><br>
-<button class="btn_left" type="button" onclick="randomPoints()">Add</button><br>
+    <canvas class="pd" id="canvas"></canvas>
+    <div style="display: inline-block;width: 600px;height:700px">
+        <svg class="solid" id = "draw-tree" easypz></svg>
+        <svg class="solid" id = "draw-ytree" easypz></svg>
+    </div>
+    <!--<button type="button" onclick="drawPolygon()">Draw polygon</button>-->
+    <div class="buttongroup">
+        <h1 class="title">3D Range Tree</h1>
+        <h3>Step 1. Draw Points</h3>
+        <button class="btn_left" type="button" onclick="clearCanvas()">Reset</button><br>
+        Click the primal plane or<br>
+        Random Points:<input type="text" id="num"><br>
+        <button class="btn_left" type="button" onclick="randomPoints()">Add</button><br>
 
-    <h3>Step 2. Build 2D range tree</h3>
-    Step 2.1  <button class="btn_left" type="button" onclick="finishDraw()" id="startBuild">Build Tree</button><br>
-    Step 2.2 <button class="btn_left" type="button" onclick="nextStepBT()">Next step for building a tree</button><br>
-    <img class="img_size" src="img/orangeline.png"> Sub-range<br>
-    <img class="img_size" src="img/blackline.png"> The middle value of sub-range
-    <h3>Step 3. Query</h3>
-<button class="btn_left" type="button" onclick="query()">Draw a new Query Rectangle</button><br>
-    <button class="btn_left" type="button" onclick="nextQuery()">Draw a new Query Rectangle</button><br>
-    <img class="img_size" src="img/blackpoint.png"> Unvisited nodes<br>
-    <img class="img_size" src="img/greenpoint.png"> Visited nodes<br>
-    <img class="img_size" src="img/blupoint.png"> Query associated tree<br>
-   <img class="img_size" src="img/redpoint.png"> Nodes lie in range<br>
-    <a href="3D.html">3D Range Tree</a>
+        <h3>Step 2. Build 2D range tree</h3>
+        Step 2.1  <button class="btn_left" type="button" onclick="finishDraw()" id="startBuild">Build Tree</button><br>
+        Step 2.2 <button class="btn_left" type="button" onclick="nextStepBT()">Next step for building a tree</button><br>
+        <img class="img_size" src="img/orangeline.png"> Sub-range<br>
+        <img class="img_size" src="img/blackline.png"> The middle value of sub-range
+        <h3>Step 3. Query</h3>
+        <button class="btn_left" type="button" onclick="query()">Draw a new Query Rectangle</button><br>
+        <button class="btn_left" type="button" onclick="nextQuery()">Draw a new Query Rectangle</button><br>
+        <img class="img_size" src="img/blackpoint.png"> Unvisited nodes<br>
+        <img class="img_size" src="img/greenpoint.png"> Visited nodes<br>
+        <img class="img_size" src="img/blupoint.png"> Query associated tree<br>
+        <img class="img_size" src="img/redpoint.png"> Nodes lie in range<br>
+        <a href="3D.html">3D Range Tree</a>
+    </div>
 </div>
-</div>
+<script src="js/three.js"></script>
 <script src="js/two.js"></script>
 <script src="js/query.js"></script>
 <script src="js/buildTree.js"></script>
 <script src="https://code.easypz.io/easypz.latest.min.js"></script>
 <script>
-    let two;
+    let three;
+    let render;
     let treePlane;
     let ytreePlane;
     let points = [];
@@ -88,17 +90,20 @@ Random Points:<input type="text" id="num"><br>
     init();
 
     function init() {
-
-        let elem = document.getElementById('draw-shapes');
+        render = new THREE.WebGLRenderer({
+            antialias:true,
+            canvas: document.getElementById("canvas")
+        });
+        render.setClearColor(0xaaaaaa,1.0);
         let elem2 = document.getElementById('draw-tree');
         let elem3 = document.getElementById('draw-ytree');
         let param1 = {width: 500, height: 700};
         let params = {width: 600, height: 350};
-        two = new Two(param1).appendTo(elem);
-        treePlane = new Two(params).appendTo(elem2);
-        ytreePlane = new Two(params).appendTo(elem3);
+        three = new three(param1).appendTo(elem);
+        treePlane = new three(params).appendTo(elem2);
+        ytreePlane = new three(params).appendTo(elem3);
         titleForDia();
-        two.update();
+        three.update();
         treePlane.update();
         ytreePlane.update();
         let click=document.getElementById("draw-shapes");
@@ -113,13 +118,13 @@ Random Points:<input type="text" id="num"><br>
             if (queryR === false) {
                 let num = document.getElementById('num').value;
                 for(let i =0;i<num;i++){
-                    let circle = two.makeCircle(parseInt(Math.random()*(490-10+1)+10,10), parseInt(Math.random()*(690-40+1)+40,10), 5);
+                    let circle = three.makeCircle(parseInt(Math.random()*(490-10+1)+10,10), parseInt(Math.random()*(690-40+1)+40,10), 5);
                     circle.linewidth = 0;
                     circle.fill = '#000000';
                     points.push(circle);
                 }
             }
-            two.update();
+            three.update();
         }
     }
 
@@ -127,7 +132,7 @@ Random Points:<input type="text" id="num"><br>
     //add points to canvas by clicking
     function clickAdd(x,y) {
         if(rectangle.length<2) {
-            let circle = two.makeCircle(x, y, 5);
+            let circle = three.makeCircle(x, y, 5);
             circle.linewidth = 0;
             if (queryR === false) {
                 circle.fill = '#000000';
@@ -138,22 +143,22 @@ Random Points:<input type="text" id="num"><br>
                 if(rectangle.length===2)
                     drawRec();
             }
-            two.update();
+            three.update();
         }
     }
 
     //check intersection of line with all line segments in lines
     function checkIntersection(line) {
         for(let i =0;i<lines.length;i++){
-                let a = line.x1, b = line.y1, c = line.x2, d = line.y2, p = lines[i].x1, q= lines[i].y1, r = lines[i].x2, s = lines[i].y2;
-                let det, gamma, lambda;
-                det = (c - a) * (s - q) - (r - p) * (d - b);
-                if (det !== 0) {
-                    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-                    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-                    if((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1) === true)
+            let a = line.x1, b = line.y1, c = line.x2, d = line.y2, p = lines[i].x1, q= lines[i].y1, r = lines[i].x2, s = lines[i].y2;
+            let det, gamma, lambda;
+            det = (c - a) * (s - q) - (r - p) * (d - b);
+            if (det !== 0) {
+                lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+                gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+                if((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1) === true)
                     return true;
-                }
+            }
 
         }
         return false;
@@ -163,7 +168,7 @@ Random Points:<input type="text" id="num"><br>
     function drawPolygon() {
         let line;
         if(points.length>2) {
-            line = two.makeLine(points[0].translation.x, points[0].translation.y, points[points.length-1].translation.x, points[points.length-1].translation.y);
+            line = three.makeLine(points[0].translation.x, points[0].translation.y, points[points.length-1].translation.x, points[points.length-1].translation.y);
             line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
             line.linewidth = 1;
             let newLine = {
@@ -178,7 +183,7 @@ Random Points:<input type="text" id="num"><br>
                 alert("Wrong Polygon! Please clear the canvas.");
             }
             lines.push(newLine);
-            two.update();
+            three.update();
         }
         else{
             alert("Not enough points");
@@ -186,7 +191,7 @@ Random Points:<input type="text" id="num"><br>
     }
 
     function titleForDia() {
-        let text = two.makeText("Primal Plane", 100, 30);
+        let text = three.makeText("Primal Plane", 100, 30);
         text.size = 30;
         text = treePlane.makeText("Range Tree", 100, 30);
         text.size = 30;
@@ -206,13 +211,13 @@ Random Points:<input type="text" id="num"><br>
         queryR  = false;
         rectangle = [];
 
-        two.clear();
+        three.clear();
         treePlane.clear();
         ytreePlane.clear();
 
 
         titleForDia();
-        two.update();
+        three.update();
         treePlane.update();
         ytreePlane.update();
     }
