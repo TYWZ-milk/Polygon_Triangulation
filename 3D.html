@@ -8,7 +8,7 @@
             border-color: black;
             border-style: solid;
             width: 600px;
-            height:350px;
+            height:235px;
             display: inline-block}
         .pd {    border-width: 1px;
             border-color: black;
@@ -37,14 +37,24 @@
             color: brown;
             margin-bottom: -3px;
         }
+        #info {
+            font-size: 30px;
+            position: absolute;
+            width: 14%;
+            text-align: center;
+            z-index: 100;
+            display:block;
+        }
     </style>
 </head>
 <body>
 <div>
+    <h3 id="info">Primal Plane</h3>
     <canvas class="pd" id="canvas"></canvas>
     <div style="display: inline-block;width: 600px;height:700px">
         <svg class="solid" id = "draw-tree" easypz></svg>
         <svg class="solid" id = "draw-ytree" easypz></svg>
+        <svg class="solid" id = "draw-ztree" easypz></svg>
     </div>
     <!--<button type="button" onclick="drawPolygon()">Draw polygon</button>-->
     <div class="buttongroup">
@@ -56,21 +66,22 @@
         <button class="btn_left" type="button" onclick="randomPoints()">Add</button><br>
 
         <h3>Step 2. Build 3D range tree</h3>
-        Step 2.1  <button class="btn_left" type="button" onclick="finishDraw()" id="startBuild">Build Tree</button><br>
-        Step 2.2 <button class="btn_left" type="button" onclick="nextStepBT()">Next step for building a tree</button><br>
-        <img class="img_size" src="img/orangeline.png"> Sub-range<br>
-        <img class="img_size" src="img/blackline.png"> The middle value of sub-range
+        Step 2.1  <button class="btn_left" type="button" onclick="build3DTree()" id="startBuild">Build Tree</button><br>
+        Step 2.2 <button class="btn_left" type="button" onclick="nextStep3DBT()">Next step for building a tree</button><br>
+        <img class="img_size" src="img/orangeline.png"> Sub-range
         <h3>Step 3. Query</h3>
         <button class="btn_left" type="button" onclick="query()">Draw a new Query Rectangle</button><br>
         <img class="img_size" src="img/blackpoint.png"> Unvisited nodes<br>
         <img class="img_size" src="img/greenpoint.png"> Visited nodes<br>
         <img class="img_size" src="img/blupoint.png"> Query associated tree<br>
         <img class="img_size" src="img/redpoint.png"> Nodes lie in range<br>
-        <a href="3D.html">3D Range Tree</a>
+        <a href="index.html">2D Range Tree</a>
     </div>
 </div>
 <script src="js/three.js"></script>
+<script src="js/build3DTree.js"></script>
 <script src="js/OrbitControl.js"></script>
+<script src="js/query3DTree.js"></script>
 <script src="js/two.js"></script>
 <script src="https://code.easypz.io/easypz.latest.min.js"></script>
 <script>
@@ -78,18 +89,19 @@
     let renderer;
     let treePlane;
     let ytreePlane;
+    let ztreePlane;
     let points = [];
     let lines = [];
-    let queryR = false;
     let rectangle = [];
     let tree;
     let treeNodes = [];
     let ytreeNodes = [];
+    let ztreeNodes = [];
     init();
 
     function build3DEnv() {
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+        camera = new THREE.PerspectiveCamera( 75, 7/5, 0.1, 1000 );
         camera.position.z = 20;
         renderer = new THREE.WebGLRenderer({
             antialias:true,
@@ -114,11 +126,14 @@
 
         let elem2 = document.getElementById('draw-tree');
         let elem3 = document.getElementById('draw-ytree');
-        let params = {width: 600, height: 350};
+        let elem4 = document.getElementById('draw-ztree');
+        let params = {width: 600, height: 235};
         treePlane = new Two(params).appendTo(elem2);
         ytreePlane = new Two(params).appendTo(elem3);
+        ztreePlane = new Two(params).appendTo(elem4);
         titleForDia();
 
+        ztreePlane.update();
         treePlane.update();
         ytreePlane.update();
     }
@@ -134,93 +149,34 @@
     function randomPoints() {
         clearCanvas();
         if(rectangle.length<2) {
-            if (queryR === false) {
                 let num = document.getElementById('num').value;
                 for(let i =0;i<num;i++){
                     let geometry = new THREE.SphereGeometry( 1.5, 32, 32 );
-                    let material = new THREE.MeshBasicMaterial( {color: '#000000'} );
+                    let material = new THREE.MeshBasicMaterial( {color: '#000000', side:THREE.DoubleSide} );
                     let sphere = new THREE.Mesh( geometry, material );
                     sphere.position.set(parseInt(Math.random()*(100+100+1)-100,10), parseInt(Math.random()*(100+1),10),parseInt(Math.random()*(100+100+1)-100,10));
                     scene.add( sphere );
                     points.push(sphere);
                 }
-            }
-
         }
     }
 
-
-    //add points to canvas by clicking
-    function clickAdd(x,y) {
-        if(rectangle.length<2) {
-            let circle = Two.makeCircle(x, y, 5);
-            circle.linewidth = 0;
-            if (queryR === false) {
-                circle.fill = '#000000';
-                points.push(circle);
-            } else {
-                circle.fill = 'rgb(100, 100, 255)';
-                rectangle.push(circle);
-                if(rectangle.length===2)
-                    drawRec();
-            }
-
-        }
-    }
-
-    //check intersection of line with all line segments in lines
-    function checkIntersection(line) {
-        for(let i =0;i<lines.length;i++){
-            let a = line.x1, b = line.y1, c = line.x2, d = line.y2, p = lines[i].x1, q= lines[i].y1, r = lines[i].x2, s = lines[i].y2;
-            let det, gamma, lambda;
-            det = (c - a) * (s - q) - (r - p) * (d - b);
-            if (det !== 0) {
-                lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-                gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-                if((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1) === true)
-                    return true;
-            }
-
-        }
-        return false;
-    }
-
-    //draw polygon
-    function drawPolygon() {
-        let line;
-        if(points.length>2) {
-            line = Two.makeLine(points[0].translation.x, points[0].translation.y, points[points.length-1].translation.x, points[points.length-1].translation.y);
-            line.stroke = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
-            line.linewidth = 1;
-            let newLine = {
-                "line":line,
-                "x1":points[0].translation.x,
-                "y1":points[0].translation.y,
-                "x2":points[points.length-1].translation.x,
-                "y2":points[points.length-1].translation.y
-            };
-            if(checkIntersection(newLine)){
-
-                alert("Wrong Polygon! Please clear the canvas.");
-            }
-            lines.push(newLine);
-
-        }
-        else{
-            alert("Not enough points");
-        }
-    }
 
     function titleForDia() {
 
-        let text = treePlane.makeText("Range Tree", 100, 30);
+        let text = treePlane.makeText("X Tree", 80, 30);
         text.size = 30;
-        text = ytreePlane.makeText("Associated Tree for each point", 240, 30);
+        text = ytreePlane.makeText("Y Tree", 80, 30);
+        text.size = 30;
+        text = ztreePlane.makeText("Z Tree", 80, 30);
         text.size = 30;
     }
 
     //clear canvas
     function clearCanvas() {
+        for (let i = 0; i < rectangle.length; i++) {
+            scene.remove(rectangle[i]);
+        }
         document.getElementById("startBuild").disabled = false;
         for(let i = 0;i<points.length;i++){
             scene.remove(points[i]);
@@ -231,17 +187,18 @@
         lines = [];
         points = [];
         ytreeNodes = [];
-        queryR  = false;
+        ztreeNodes = [];
         rectangle = [];
 
         treePlane.clear();
         ytreePlane.clear();
-
+        ztreePlane.clear();
 
         titleForDia();
 
         treePlane.update();
         ytreePlane.update();
+        ztreePlane.update();
     }
 </script>
 </body>
