@@ -17,6 +17,13 @@ function query() {
         ytreeNodes[i].fill = '#000000';
     }
 
+    for(let i =0;i<queryNodes.length;i++){
+        queryNodes[i].node.circle.fill = '#000000';
+    }
+
+    indexOfqueryNodes = 0;
+    DrawcurrentYtree = null;
+    queryNodes = [];
     rectangle = [];
     queryR = true;
     ytreePlane.clear();
@@ -25,6 +32,31 @@ function query() {
     ytreePlane.update();
     two.update();
 }
+let DrawcurrentYtree = null;
+let indexOfqueryNodes = 0;
+function nextStepQ() {
+    if(indexOfqueryNodes<queryNodes.length) {
+        if(queryNodes[indexOfqueryNodes].state==="visited")
+            queryNodes[indexOfqueryNodes].node.circle.fill = 'rgb(10, 200, 25)';
+        else if(queryNodes[indexOfqueryNodes].state==="leaf")
+            queryNodes[indexOfqueryNodes].node.circle.fill = 'rgb(200, 1, 25)';
+        else if(queryNodes[indexOfqueryNodes].state==="asso") {
+            ytreePlane.clear();
+            DrawcurrentYtree = queryNodes[indexOfqueryNodes].node.yTree;
+            queryNodes[indexOfqueryNodes].node.circle.fill = 'rgb(10, 200, 250)';
+        }
+        indexOfqueryNodes++;
+    }
+    if(DrawcurrentYtree!=null){
+        ytreePlane.clear();
+        drawYtree(DrawcurrentYtree,null,300,50,1);
+        titleForDia();
+    }
+
+    ytreePlane.update();
+    treePlane.update();
+}
+
 function drawRec() {
     let circle = two.makeCircle(rectangle[0].translation.x, rectangle[1].translation.y, 5);
     circle.fill = 'rgb(100, 100, 255)';
@@ -82,15 +114,19 @@ function drawRec() {
 function queryintree(root,range) {
     if(root == null)return;
     for(let i =0;i<treeNodes.length;i++){
-        if(treeNodes[i].child===root)
-            treeNodes[i].child.circle.fill = 'rgb(10, 200, 25)';
+        if(treeNodes[i].child===root) {
+            // treeNodes[i].child.circle.fill = 'rgb(10, 200, 25)';
+            queryNodes.push({node:treeNodes[i].child,state:"visited"});
+        }
     }
     if(root.leftChild == null && root.rightChild == null){
         if(range.lowx<root.range[0].translation.x && root.range[0].translation.x<range.highx
             && range.lowy<root.range[0].translation.y &&root.range[0].translation.y <range.highy) {
             for(let i =0;i<treeNodes.length;i++){
-                if(treeNodes[i].child===root)
-                    treeNodes[i].child.circle.fill = 'rgb(200, 1, 25)';
+                if(treeNodes[i].child===root) {
+                    // treeNodes[i].child.circle.fill = 'rgb(200, 1, 25)';
+                    queryNodes[queryNodes.length-1].state="leaf";
+                }
             }
             root.range[0].fill = 'rgb(200, 1, 25)';
             return;
@@ -100,8 +136,10 @@ function queryintree(root,range) {
     }
     if(range.lowx<root.range[0].translation.x && root.range[root.range.length-1].translation.x<range.highx) {
         for(let i =0;i<treeNodes.length;i++){
-            if(treeNodes[i].child===root)
-                treeNodes[i].child.circle.fill = 'rgb(10, 200, 250)';
+            if(treeNodes[i].child===root) {
+                // treeNodes[i].child.circle.fill = 'rgb(10, 200, 250)';
+                queryNodes[queryNodes.length-1].state="asso";
+            }
         }
         queryYtree(root.yTree, range);
     }
@@ -113,13 +151,15 @@ function queryintree(root,range) {
 }
 function queryYtree(ytree,range) {
     if(ytree == null)return;
-    ytree.fill='rgb(10, 200, 25)';
+    // ytree.circle.fill='rgb(10, 200, 25)';
+    queryNodes.push({node:ytree,state:"visited"});
     ytreeNodes.push(ytree);
     if(ytree.leftChild == null && ytree.rightChild == null){
         if(range.lowx<ytree.range[0].translation.x && ytree.range[0].translation.x<range.highx
             && range.lowy<ytree.range[0].translation.y &&ytree.range[0].translation.y <range.highy) {
             ytree.range[0].fill = 'rgb(200, 1, 25)';
-            ytree.fill='rgb(200, 1, 25)';
+            // ytree.circle.fill='rgb(200, 1, 25)';
+            queryNodes[queryNodes.length-1].state="leaf";
             return;
         }
         else
@@ -129,6 +169,7 @@ function queryYtree(ytree,range) {
         for (let i = 0; i < ytree.range.length; i++) {
             ytree.range[i].fill = 'rgb(200, 1, 25)';
         }
+        queryNodes.splice(-1,1);
         colorSubTree(ytree);
     }
     else if(!(range.lowy>ytree.range[ytree.range.length-1].translation.y) && !(range.highy<ytree.range[0].translation.y)) {
@@ -139,9 +180,12 @@ function queryYtree(ytree,range) {
 
 function colorSubTree(ytree) {
     if(ytree===null||ytree===undefined)return;
-    ytree.fill='rgb(10, 200, 25)';
-    if(ytree.leftChild == null && ytree.rightChild == null)
-        ytree.fill='rgb(200, 1, 25)';
+    // ytree.circle.fill='rgb(10, 200, 25)';
+    queryNodes.push({node:ytree,state:"visited"});
+    if(ytree.leftChild == null && ytree.rightChild == null) {
+        // ytree.circle.fill = 'rgb(200, 1, 25)';
+        queryNodes[queryNodes.length-1].state="leaf";
+    }
     ytreeNodes.push(ytree);
     colorSubTree(ytree.leftChild);
     colorSubTree(ytree.rightChild);

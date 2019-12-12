@@ -2,8 +2,17 @@ let indexOftreeNodes = 0;
 function nextStepBT() {
     if(indexOftreeNodes<treeNodes.length) {
         drawNode(treeNodes[indexOftreeNodes].child, treeNodes[indexOftreeNodes].parent, treeNodes[indexOftreeNodes].addX, treeNodes[indexOftreeNodes].addY);
-        indexOftreeNodes++;
+        if(treeNodes[indexOftreeNodes].child.yTree!==null || treeNodes[indexOftreeNodes].child.yTree!==undefined) {
+            ytreePlane.clear();
+            drawYtree(treeNodes[indexOftreeNodes].child.yTree, null, 300, 50, 1);
+        }
+        else{
+            ytreePlane.clear();
+        }
+        titleForDia();
+        ytreePlane.update();
         document.getElementById("startBuild").disabled = true;
+        indexOftreeNodes++;
     }
 }
 function finishDraw() {
@@ -137,10 +146,10 @@ function BuildYtree(sortedY) {
 function drawYtree(tree,root,addX,addY,level) {
     if(tree == null)return;
     let circle = ytreePlane.makeCircle(addX, addY, 5);
-    if(tree.fill===undefined)
+    if(tree.circle===undefined)
         circle.fill= '#000000';
     else
-        circle.fill = tree.fill;
+        circle.fill = tree.circle.fill;
     circle.linewidth = 0;
     ytreePlane.update();
     circle._renderer.elem.addEventListener('mouseover', function() {
@@ -162,7 +171,6 @@ function drawYtree(tree,root,addX,addY,level) {
 
         midRange = {low:lowLine,high:highLine};
 
-
         ytreePlane.update();
         two.update();
     }, false);
@@ -177,6 +185,7 @@ function drawYtree(tree,root,addX,addY,level) {
         ytreePlane.update();
         two.update();
     }, false);
+    tree.circle = circle;
     drawYtree(tree.leftChild,circle,addX-points.length*15/level,addY+50,level+1);
     drawYtree(tree.rightChild,circle,addX+points.length*15/level,addY+50,level+1);
 
@@ -184,5 +193,6 @@ function drawYtree(tree,root,addX,addY,level) {
         let line = ytreePlane.makeLine(circle.translation.x, circle.translation.y, root.translation.x, root.translation.y,);
         line.stroke = '#000000';
         line.linewidth = 1;
+        ytreePlane.update();
     }
 }

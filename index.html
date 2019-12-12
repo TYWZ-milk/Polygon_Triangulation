@@ -62,6 +62,7 @@ Random Points:<input type="text" id="num"><br>
     <img class="img_size" src="img/blackline.png"> The middle value of sub-range
     <h3>Step 3. Query</h3>
 <button class="btn_left" type="button" onclick="query()">Draw a new Query Rectangle</button><br>
+    <button class="btn_left" type="button" onclick="nextStepQ()">Next step for querying</button><br>
     <img class="img_size" src="img/blackpoint.png"> Unvisited nodes<br>
     <img class="img_size" src="img/greenpoint.png"> Visited nodes<br>
     <img class="img_size" src="img/blupoint.png"> Query associated tree<br>
@@ -84,6 +85,7 @@ Random Points:<input type="text" id="num"><br>
     let tree;
     let treeNodes = [];
     let ytreeNodes = [];
+    let queryNodes = [];
     init();
 
     function init() {
@@ -198,12 +200,14 @@ Random Points:<input type="text" id="num"><br>
         document.getElementById("startBuild").disabled = false;
         treeNodes = [];
         indexOftreeNodes = 0;
+        indexOfqueryNodes = 0;
         tree = null;
         lines = [];
         points = [];
         ytreeNodes = [];
         queryR  = false;
         rectangle = [];
+        queryNodes = [];
 
         two.clear();
         treePlane.clear();
